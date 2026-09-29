@@ -583,6 +583,56 @@ a:focus-visible {
   animation: loading-spin 1s linear infinite;
 }
 
+.media-load-progress {
+  width: min(100%, 330px);
+  margin-top: 4px;
+  text-align: left;
+}
+
+.media-load-progress-copy {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.media-load-progress-copy span:first-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.media-load-progress-track {
+  height: 5px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--border-strong);
+}
+
+.media-load-progress-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent-strong);
+  transition: width 180ms ease;
+}
+
+.media-load-progress-fill.indeterminate {
+  width: 35%;
+  animation: media-load-progress 1.2s ease-in-out infinite alternate;
+}
+
+@keyframes media-load-progress {
+  from {
+    transform: translateX(-60%);
+  }
+  to {
+    transform: translateX(200%);
+  }
+}
+
 @keyframes loading-spin {
   to {
     transform: rotate(360deg);
@@ -748,6 +798,11 @@ a:focus-visible {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(245px, 1fr));
   gap: 14px;
+}
+
+.media-load-more {
+  min-height: 1px;
+  grid-column: 1 / -1;
 }
 
 .media-card {
@@ -1026,8 +1081,21 @@ a:focus-visible {
   gap: 15px;
 }
 
+.site-footer-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
 .license-link {
   font-size: 11px;
+}
+
+.app-version {
+  color: var(--subtle);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
 }
 
 .site-footer a {

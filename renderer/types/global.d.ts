@@ -20,6 +20,9 @@ declare global {
           date: string
         }>
       >
+      onMediaLoadProgress: (
+        listener: (progress: { loaded: number; total: number | null }) => void,
+      ) => () => void
       getFolderSummaries: (folders: string[]) => Promise<
         Array<{
           path: string

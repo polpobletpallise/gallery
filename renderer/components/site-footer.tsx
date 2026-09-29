@@ -1,4 +1,5 @@
 import { FaGithub } from 'react-icons/fa6'
+import packageJson from '../../package.json'
 import Logo from './Logo'
 import { useI18n } from './language-provider'
 
@@ -9,14 +10,17 @@ export function SiteFooter() {
     <footer className="site-footer">
       <p className="privacy-notice">{t('privacyNotice')}</p>
       <div className="site-footer-bottom">
-        <a
-          className="license-link"
-          href="https://spdx.org/licenses/GPL-3.0-or-later.html"
-          target="_blank"
-          rel="noreferrer"
-        >
-          {t('licenseNotice')}
-        </a>
+        <div className="site-footer-meta">
+          <a
+            className="license-link"
+            href="https://spdx.org/licenses/GPL-3.0-or-later.html"
+            target="_blank"
+            rel="noreferrer"
+          >
+            {t('licenseNotice')}
+          </a>
+          <span className="app-version">v{packageJson.version}</span>
+        </div>
         <div className="site-footer-links">
           <a
             className="social-link"

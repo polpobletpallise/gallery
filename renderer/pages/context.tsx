@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type PointerEvent } from 'react'
+import { useEffect, useMemo, useRef, useState, type PointerEvent } from 'react'
 import type { IconType } from 'react-icons'
 import { FiImage, FiMusic, FiVideo } from 'react-icons/fi'
 import {
@@ -30,6 +30,8 @@ interface MediaFile {
 type MediaFilter = 'all' | MediaFile['type']
 type ViewMode = 'grid' | 'rows' | 'centeredRows'
 
+const MEDIA_BATCH_SIZE = 60
+
 const MEDIA_ICONS: Record<MediaFile['type'], IconType> = {
   image: FiImage,
   video: FiVideo,
@@ -59,6 +61,8 @@ export default function ContentPage() {
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
   const [loading, setLoading] = useState(true)
+  const [mediaProgress, setMediaProgress] = useState<{ loaded: number; total: number | null } | null>(null)
+  const [visibleCount, setVisibleCount] = useState(MEDIA_BATCH_SIZE)
   const [viewMode, setViewMode] = useState<ViewMode>('grid')
   const [selectedImage, setSelectedImage] = useState<MediaFile | null>(null)
   const [imageZoom, setImageZoom] = useState(1)
@@ -69,6 +73,7 @@ export default function ContentPage() {
   const dragRef = useRef<{ pointerId: number; x: number; y: number; offsetX: number; offsetY: number } | null>(null)
   const lightboxRef = useRef<HTMLDivElement>(null)
   const lightboxImageRef = useRef<HTMLImageElement>(null)
+  const loadMoreRef = useRef<HTMLDivElement>(null)
   const [playbackErrors, setPlaybackErrors] = useState<Record<string, string>>({})
   const { folders, title } = router.query
 
@@ -135,10 +140,17 @@ export default function ContentPage() {
     if (!folders) {
       setFiles([])
       setLoading(false)
+      setMediaProgress(null)
       return
     }
 
     let active = true
+    setFiles([])
+    setMediaProgress({ loaded: 0, total: null })
+    setVisibleCount(MEDIA_BATCH_SIZE)
+    const unsubscribe = window.electronAPI?.onMediaLoadProgress((progress) => {
+      if (active) setMediaProgress(progress)
+    })
 
     async function loadFiles() {
       setLoading(true)
@@ -155,38 +167,76 @@ export default function ContentPage() {
         console.error('Error al cargar los archivos multimedia:', error)
         if (active) setFiles([])
       } finally {
-        if (active) setLoading(false)
+        if (active) {
+          setLoading(false)
+          setMediaProgress(null)
+        }
       }
     }
 
     loadFiles()
     return () => {
       active = false
+      unsubscribe?.()
     }
   }, [folders, router.isReady])
 
-  const normalizedNameQuery = nameQuery.trim().toLocaleLowerCase(locale)
-  const filteredFiles = files.filter((file) => {
-    const matchesType = filter === 'all' || file.type === filter
-    const matchesName = file.name.toLocaleLowerCase(locale).includes(normalizedNameQuery)
-    const matchesExtension = extensionFilter === 'all' || getFileExtension(file.name) === extensionFilter
-    const fileDate = getLocalDateValue(file.date)
-    const matchesDateFrom = !dateFrom || (fileDate !== '' && fileDate >= dateFrom)
-    const matchesDateTo = !dateTo || (fileDate !== '' && fileDate <= dateTo)
-    return matchesType && matchesName && matchesExtension && matchesDateFrom && matchesDateTo
-  })
-  const availableExtensions = new Set(files.map((file) => getFileExtension(file.name)))
-  const extensions = Object.values(MEDIA_FORMATS)
-    .flatMap((formats) => formats.map((format) => format.slice(1)))
-    .filter((extension) => availableExtensions.has(extension))
-    .sort()
-  const counts = {
-    all: files.length,
-    image: files.filter((file) => file.type === 'image').length,
-    video: files.filter((file) => file.type === 'video').length,
-    audio: files.filter((file) => file.type === 'audio').length,
-  }
+  const filteredFiles = useMemo(() => {
+    const normalizedNameQuery = nameQuery.trim().toLocaleLowerCase(locale)
+    return files.filter((file) => {
+      const matchesType = filter === 'all' || file.type === filter
+      const matchesName = file.name.toLocaleLowerCase(locale).includes(normalizedNameQuery)
+      const matchesExtension = extensionFilter === 'all' || getFileExtension(file.name) === extensionFilter
+      const fileDate = getLocalDateValue(file.date)
+      const matchesDateFrom = !dateFrom || (fileDate !== '' && fileDate >= dateFrom)
+      const matchesDateTo = !dateTo || (fileDate !== '' && fileDate <= dateTo)
+      return matchesType && matchesName && matchesExtension && matchesDateFrom && matchesDateTo
+    })
+  }, [dateFrom, dateTo, extensionFilter, files, filter, locale, nameQuery])
+  const extensions = useMemo(() => {
+    const availableExtensions = new Set(files.map((file) => getFileExtension(file.name)))
+    return Object.values(MEDIA_FORMATS)
+      .flatMap((formats) => formats.map((format) => format.slice(1)))
+      .filter((extension) => availableExtensions.has(extension))
+      .sort()
+  }, [files])
+  const counts = useMemo(
+    () =>
+      files.reduce(
+        (result, file) => {
+          result[file.type] += 1
+          return result
+        },
+        { all: files.length, image: 0, video: 0, audio: 0 },
+      ),
+    [files],
+  )
+  const progressPercent =
+    mediaProgress?.total === null || mediaProgress === null
+      ? null
+      : mediaProgress.total === 0
+        ? 100
+        : Math.min(100, Math.floor((mediaProgress.loaded / mediaProgress.total) * 100))
   const pageTitle = typeof title === 'string' && title !== '__all__' ? title : t('galleryTitle')
+
+  useEffect(() => {
+    setVisibleCount(MEDIA_BATCH_SIZE)
+  }, [dateFrom, dateTo, extensionFilter, filter, files, nameQuery])
+
+  useEffect(() => {
+    if (loading || visibleCount >= filteredFiles.length || !loadMoreRef.current) return
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisibleCount((count) => Math.min(count + MEDIA_BATCH_SIZE, filteredFiles.length))
+        }
+      },
+      { rootMargin: '500px' },
+    )
+    observer.observe(loadMoreRef.current)
+    return () => observer.disconnect()
+  }, [filteredFiles.length, loading, visibleCount])
 
   const updateViewMode = (nextViewMode: ViewMode) => {
     setViewMode(nextViewMode)
@@ -407,6 +457,32 @@ export default function ContentPage() {
             </span>
             <h2>{t('loadingFiles')}</h2>
             <p>{t('loadingFilesDescription')}</p>
+            <div className="media-load-progress">
+              <div className="media-load-progress-copy">
+                <span>
+                  {mediaProgress?.total === null || mediaProgress === null
+                    ? t('loadingFilesDescription')
+                    : t('mediaLoadProgress', {
+                        loaded: mediaProgress.loaded,
+                        total: mediaProgress.total,
+                      })}
+                </span>
+                <span>{progressPercent === null ? '…' : `${progressPercent}%`}</span>
+              </div>
+              <div
+                className="media-load-progress-track"
+                role="progressbar"
+                aria-label={t('loadingFiles')}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-valuenow={progressPercent ?? undefined}
+              >
+                <div
+                  className={`media-load-progress-fill${progressPercent === null ? ' indeterminate' : ''}`}
+                  style={progressPercent === null ? undefined : { width: `${progressPercent}%` }}
+                />
+              </div>
+            </div>
           </div>
         ) : filteredFiles.length === 0 ? (
           <div className="empty-state">
@@ -424,7 +500,7 @@ export default function ContentPage() {
           <div
             className={`media-grid${viewMode === 'rows' ? ' media-rows' : ''}${viewMode === 'centeredRows' ? ' media-centered-rows' : ''}`}
           >
-            {filteredFiles.map((file) => {
+            {filteredFiles.slice(0, visibleCount).map((file) => {
               const MediaIcon = MEDIA_ICONS[file.type]
               const srcUrl = `local-media://media/${encodeURIComponent(file.path)}`
               const extensionIndex = file.name.lastIndexOf('.')
@@ -454,7 +530,7 @@ export default function ContentPage() {
                     {file.type === 'video' && (
                       <video
                         controls
-                        preload="metadata"
+                        preload="none"
                         src={srcUrl}
                         onError={(event) => reportPlaybackError(file, event.currentTarget.error)}
                         onCanPlay={() => clearPlaybackError(file.path)}
@@ -464,7 +540,7 @@ export default function ContentPage() {
                       <div className="media-preview-placeholder">
                         <audio
                           controls
-                          preload="metadata"
+                          preload="none"
                           src={srcUrl}
                           onError={(event) => reportPlaybackError(file, event.currentTarget.error)}
                           onCanPlay={() => clearPlaybackError(file.path)}
@@ -506,6 +582,7 @@ export default function ContentPage() {
                 </article>
               )
             })}
+            {visibleCount < filteredFiles.length && <div ref={loadMoreRef} className="media-load-more" />}
           </div>
         )}
       </section>

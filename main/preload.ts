@@ -18,4 +18,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.on('update-download-progress', handler)
     return () => ipcRenderer.removeListener('update-download-progress', handler)
   },
+  onMediaLoadProgress: (listener: (progress: { loaded: number; total: number | null }) => void) => {
+    const handler = (
+      _event: Electron.IpcRendererEvent,
+      progress: { loaded: number; total: number | null },
+    ) => listener(progress)
+    ipcRenderer.on('media-load-progress', handler)
+    return () => ipcRenderer.removeListener('media-load-progress', handler)
+  },
 })

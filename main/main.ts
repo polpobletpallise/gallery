@@ -188,9 +188,13 @@ async function getCaptureDate(filePath: string, fileType: MediaType, fallbackDat
   return fallbackDate
 }
 
-async function listMediaFiles(folderPaths: string[]): Promise<MediaFile[]> {
-  const mediaFiles: MediaFile[] = []
+async function listMediaFiles(
+  folderPaths: string[],
+  onProgress: (loaded: number, total: number | null) => void = () => {},
+): Promise<MediaFile[]> {
+  const candidates: Array<{ name: string; path: string; type: MediaType; folder: string }> = []
 
+  onProgress(0, null)
   for (const folderPath of folderPaths) {
     try {
       const folderStat = await fs.promises.stat(folderPath)
@@ -201,43 +205,71 @@ async function listMediaFiles(folderPaths: string[]): Promise<MediaFile[]> {
       for (const file of files) {
         if (!file.isFile()) continue
 
-        const fullPath = path.join(folderPath, file.name)
         const type = getMediaType(file.name)
         if (!type) continue
 
-        try {
-          const stat = await fs.promises.stat(fullPath)
-          const fallbackDate = stat.birthtime.getTime() > 0 ? stat.birthtime : stat.mtime
-          const date = await getCaptureDate(fullPath, type, fallbackDate)
-          mediaFiles.push({
-            name: file.name,
-            path: fullPath,
-            type,
-            folder: folderPath,
-            date: date.toISOString(),
-          })
-        } catch (error) {
-          console.error(`Error leyendo el archivo multimedia ${fullPath}:`, error)
-        }
+        candidates.push({ name: file.name, path: path.join(folderPath, file.name), type, folder: folderPath })
       }
     } catch (error) {
       console.error(`Error leyendo la carpeta ${folderPath}:`, error)
     }
   }
 
-  return mediaFiles
+  const total = candidates.length
+  onProgress(0, total)
+  const results: Array<MediaFile | undefined> = new Array(total)
+  const reportInterval = Math.max(1, Math.ceil(total / 100))
+  const workerCount = Math.min(6, total)
+  let nextIndex = 0
+  let loaded = 0
+
+  const processCandidates = async () => {
+    while (nextIndex < total) {
+      const index = nextIndex
+      nextIndex += 1
+      const candidate = candidates[index]
+
+      try {
+        const stat = await fs.promises.stat(candidate.path)
+        const fallbackDate = stat.birthtime.getTime() > 0 ? stat.birthtime : stat.mtime
+        const date = await getCaptureDate(candidate.path, candidate.type, fallbackDate)
+        results[index] = {
+          name: candidate.name,
+          path: candidate.path,
+          type: candidate.type,
+          folder: candidate.folder,
+          date: date.toISOString(),
+        }
+      } catch (error) {
+        console.error(`Error leyendo el archivo multimedia ${candidate.path}:`, error)
+      }
+
+      loaded += 1
+      if (loaded % reportInterval === 0 || loaded === total) {
+        onProgress(loaded, total)
+        await new Promise<void>((resolve) => setImmediate(resolve))
+      }
+    }
+  }
+
+  await Promise.all(Array.from({ length: workerCount }, processCandidates))
+  return results.filter((file): file is MediaFile => file !== undefined)
 }
 
 function validateFolderPaths(folderPaths: unknown): folderPaths is string[] {
   return Array.isArray(folderPaths) && folderPaths.every((folderPath) => typeof folderPath === 'string')
 }
 
-ipcMain.handle('get-media-files', async (_event, folderPaths: unknown) => {
+ipcMain.handle('get-media-files', async (event, folderPaths: unknown) => {
   if (!validateFolderPaths(folderPaths)) {
     throw new TypeError('La lista de carpetas multimedia no es válida.')
   }
 
-  return listMediaFiles(folderPaths)
+  return listMediaFiles(folderPaths, (loaded, total) => {
+    if (!event.sender.isDestroyed()) {
+      event.sender.send('media-load-progress', { loaded, total })
+    }
+  })
 })
 
 ipcMain.handle('get-folder-summaries', async (_event, folderPaths: unknown) => {
