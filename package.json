@@ -2,7 +2,7 @@
   "private": true,
   "name": "my-nextron-app",
   "description": "A local-first media gallery for photos, videos, and audio.",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "author": "Pol Poblet Pallisé",
   "license": "GPL-3.0-or-later",
   "type": "module",
@@ -14,6 +14,7 @@
     "dist": "npm run build && electron-builder --win"
   },
   "dependencies": {
+    "electron-log": "^5.4.4",
     "electron-serve": "^3.0.0",
     "electron-store": "^11.0.2",
     "electron-updater": "^6.8.9",

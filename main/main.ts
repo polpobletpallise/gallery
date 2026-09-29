@@ -7,29 +7,45 @@ import electronUpdater from 'electron-updater'
 import serve from 'electron-serve'
 import { getMediaType, type MediaType } from '../shared/media-formats.js'
 import { createWindow } from './helpers/create-window'
+import log from 'electron-log'
 
 const isProd = process.env.NODE_ENV === 'production'
 const { autoUpdater } = electronUpdater
 
+log.transports.file.level = 'info'
+autoUpdater.logger = log
+
 autoUpdater.autoDownload = true
 
-autoUpdater.on('update-available', () => {
-  console.log('Hay una actualización disponible. Se descargará en segundo plano.')
+autoUpdater.on('checking-for-update', () => {
+  log.info('Comprobando actualizaciones...')
+})
+
+autoUpdater.on('update-available', (info) => {
+  log.info('Actualización disponible:', info.version)
+})
+
+autoUpdater.on('update-not-available', (info) => {
+  log.info('No hay actualizaciones disponibles. Versión:', info.version)
 })
 
 autoUpdater.on('download-progress', (progress) => {
+  log.info(`Descargando actualización: ${progress.percent.toFixed(1)}%`)
+
   const mainWindow = BrowserWindow.getAllWindows()[0]
+
   if (mainWindow && !mainWindow.isDestroyed()) {
     mainWindow.webContents.send('update-download-progress', progress.percent)
   }
 })
 
-autoUpdater.on('error', (error) => {
-  console.error('Error al actualizar Gallery:', error)
+autoUpdater.on('update-downloaded', (info) => {
+  log.info('Actualización descargada:', info.version)
+  autoUpdater.quitAndInstall()
 })
 
-autoUpdater.on('update-downloaded', () => {
-  autoUpdater.quitAndInstall()
+autoUpdater.on('error', (error) => {
+  log.error('Error al actualizar Gallery:', error)
 })
 
 protocol.registerSchemesAsPrivileged([
@@ -69,40 +85,42 @@ app.whenReady().then(() => {
   })
 })
 
-;(async () => {
-  await app.whenReady()
+  ; (async () => {
+    await app.whenReady()
 
-  const mainWindow = createWindow('main', {
-    width: 1000,
-    height: 600,
-    title: 'Gallery',
-    autoHideMenuBar: true,
-    webPreferences: {
-      preload: path.join(import.meta.dirname, 'preload.js'),
-    },
-  })
-  mainWindow.on('page-title-updated', (event) => {
-    event.preventDefault()
-    mainWindow.setTitle('Gallery')
-  })
-  mainWindow.maximize()
+    if (app.isPackaged) {
+      log.info('Aplicación empaquetada. Comprobando actualizaciones...')
+      autoUpdater.checkForUpdates().catch((error: unknown) => {
+        log.error('No se pudieron comprobar las actualizaciones:', error)
+      })
+    }
 
-  if (isProd) {
-    await mainWindow.loadURL('app://./home')
-  } else {
-    const port = process.argv[2]
-    await mainWindow.loadURL(`http://localhost:${port}/home`)
-  }
-
-  if (app.isPackaged) {
-    autoUpdater.checkForUpdatesAndNotify().catch((error: unknown) => {
-      console.error('No se pudieron comprobar las actualizaciones:', error)
+    const mainWindow = createWindow('main', {
+      width: 1000,
+      height: 600,
+      title: 'Gallery',
+      autoHideMenuBar: true,
+      webPreferences: {
+        preload: path.join(import.meta.dirname, 'preload.js'),
+      },
     })
-  }
-})().catch((error: unknown) => {
-  console.error('Error al iniciar la ventana principal:', error)
-  app.quit()
-})
+    mainWindow.on('page-title-updated', (event) => {
+      event.preventDefault()
+      mainWindow.setTitle('Gallery')
+    })
+    mainWindow.maximize()
+
+    if (isProd) {
+      await mainWindow.loadURL('app://./home')
+    } else {
+      const port = process.argv[2]
+      await mainWindow.loadURL(`http://localhost:${port}/home`)
+    }
+
+  })().catch((error: unknown) => {
+    console.error('Error al iniciar la ventana principal:', error)
+    app.quit()
+  })
 
 app.on('window-all-closed', () => {
   app.quit()
@@ -190,7 +208,7 @@ async function getCaptureDate(filePath: string, fileType: MediaType, fallbackDat
 
 async function listMediaFiles(
   folderPaths: string[],
-  onProgress: (loaded: number, total: number | null) => void = () => {},
+  onProgress: (loaded: number, total: number | null) => void = () => { },
 ): Promise<MediaFile[]> {
   const candidates: Array<{ name: string; path: string; type: MediaType; folder: string }> = []
 
