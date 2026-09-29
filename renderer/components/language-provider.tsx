@@ -1,0 +1,303 @@
+import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react'
+
+export type Language = 'en' | 'es' | 'ca'
+
+const messages = {
+  en: {
+    language: 'Language',
+    mediaFilesLabel: 'Media files',
+    filterMediaType: 'Filter files by media type',
+    displayMode: 'Display mode',
+    themeLight: 'Light mode',
+    themeDark: 'Dark mode',
+    changeTheme: 'Switch to {theme} theme',
+    backToFolders: 'Back to folders',
+    homeEyebrow: 'Your media space',
+    homeTitle: 'All your media, in one place.',
+    homeDescription: 'Organize your photos, videos, and audio. Add a folder to start exploring your library.',
+    allMedia: 'Explore your whole library',
+    foldersInLibrary: '{count} folders in your library',
+    foldersHeading: 'Your folders',
+    foldersDescription: 'Local folders saved on this device',
+    addFolder: 'Add folder',
+    libraryStarts: 'Your library starts here',
+    libraryStartsDescription: 'Add a folder from your device to discover and organize your media.',
+    selectFolder: 'Select folder',
+    folderNotFound: 'This folder is no longer available at this location',
+    folderCheckFailed: 'Could not check this folder',
+    folderNotFoundShort: 'Location unavailable',
+    checkingFiles: 'Checking files…',
+    file: 'file',
+    files: 'files',
+    changeFolder: 'Change folder',
+    openLocation: 'Open location',
+    openLocationFailed: 'Could not open this location.',
+    folderDesktop: 'Desktop',
+    folderDownloads: 'Downloads',
+    folderDocuments: 'Documents',
+    folderPictures: 'Pictures',
+    folderMusic: 'Music',
+    folderVideos: 'Videos',
+    removeFolder: 'Remove {folder}',
+    folderNotFoundAria: 'Folder not found',
+    folderCheckFailedAria: 'Folder could not be checked',
+    pickerFailed: 'Could not open the folder picker.',
+    duplicateFolder: 'That folder is already in your library.',
+    galleryEyebrow: 'Media library',
+    galleryTitle: 'Your media library',
+    galleryDescription: 'Browse your media and filter by type, name, or extension.',
+    searchingContent: 'Searching your library…',
+    itemsInLibrary: '{count} items in your library',
+    filesHeading: 'Files',
+    allTypes: 'All',
+    images: 'Images',
+    videos: 'Videos',
+    audio: 'Audio',
+    gridView: 'Grid view',
+    listView: 'List view',
+    centeredRowsView: 'Centered rows view',
+    searchByName: 'Search by filename…',
+    filterByExtension: 'All extensions',
+    dateFrom: 'From date',
+    dateTo: 'To date',
+    clearDateFilters: 'Clear dates',
+    loadingFiles: 'Finding your files',
+    loadingFilesDescription: 'Getting the contents of your folders ready.',
+    noMediaFiles: 'No media files found',
+    noFilterResults: 'No files match these filters',
+    noMediaFilesDescription: 'We could not find any photos, videos, or audio in the selected folders.',
+    noFilterResultsDescription: 'Try a different category, name, or extension.',
+    noDate: 'Date unavailable',
+    enlargeImage: 'Enlarge {file}',
+    closeEnlargedImage: 'Close enlarged image',
+    imageEnlarged: 'Enlarged image: {file}',
+    playbackError: 'Could not play this file. Its format or codec may not be supported.',
+    authorCredit: 'Made by',
+    scoutingProject: 'Explore xScouting',
+    privacyNotice: 'Gallery does not collect or transmit your data. Your media and preferences stay on this device.',
+    licenseNotice: 'Licensed under GNU GPL v3 or later',
+    notFoundEyebrow: 'Page not found',
+    notFoundTitle: 'This page is off the map.',
+    notFoundDescription: 'The page may have moved or the address may be incorrect. Head back to your media library.',
+    notFoundHome: 'Go to your library',
+  },
+  es: {
+    language: 'Idioma',
+    mediaFilesLabel: 'Archivos multimedia',
+    filterMediaType: 'Filtrar archivos por tipo',
+    displayMode: 'Modo de visualización',
+    themeLight: 'Modo claro',
+    themeDark: 'Modo oscuro',
+    changeTheme: 'Cambiar al tema {theme}',
+    backToFolders: 'Volver a las carpetas',
+    homeEyebrow: 'Tu espacio multimedia',
+    homeTitle: 'Todo tu contenido, en un solo lugar.',
+    homeDescription: 'Organiza tus fotos, vídeos y audio. Añade una carpeta para empezar a explorar tu biblioteca.',
+    allMedia: 'Explorar toda la biblioteca',
+    foldersInLibrary: '{count} carpetas en tu biblioteca',
+    foldersHeading: 'Tus carpetas',
+    foldersDescription: 'Carpetas locales guardadas en este dispositivo',
+    addFolder: 'Añadir carpeta',
+    libraryStarts: 'Tu biblioteca empieza aquí',
+    libraryStartsDescription: 'Añade una carpeta de tu equipo para descubrir y organizar tus archivos multimedia.',
+    selectFolder: 'Seleccionar carpeta',
+    folderNotFound: 'La carpeta ya no está disponible en esta ubicación',
+    folderCheckFailed: 'No se pudo comprobar esta carpeta',
+    folderNotFoundShort: 'Ubicación no disponible',
+    checkingFiles: 'Comprobando archivos…',
+    file: 'archivo',
+    files: 'archivos',
+    changeFolder: 'Cambiar carpeta',
+    openLocation: 'Abrir ubicación',
+    openLocationFailed: 'No se pudo abrir esta ubicación.',
+    folderDesktop: 'Escritorio',
+    folderDownloads: 'Descargas',
+    folderDocuments: 'Documentos',
+    folderPictures: 'Imágenes',
+    folderMusic: 'Música',
+    folderVideos: 'Vídeos',
+    removeFolder: 'Eliminar {folder}',
+    folderNotFoundAria: 'Carpeta no encontrada',
+    folderCheckFailedAria: 'No se pudo comprobar la carpeta',
+    pickerFailed: 'No se pudo abrir el selector de carpetas.',
+    duplicateFolder: 'Esa carpeta ya está en tu biblioteca.',
+    galleryEyebrow: 'Biblioteca multimedia',
+    galleryTitle: 'Tu biblioteca multimedia',
+    galleryDescription: 'Explora tus archivos y filtra por tipo, nombre o extensión.',
+    searchingContent: 'Buscando en tu biblioteca…',
+    itemsInLibrary: '{count} elementos en tu biblioteca',
+    filesHeading: 'Archivos',
+    allTypes: 'Todo',
+    images: 'Imágenes',
+    videos: 'Vídeos',
+    audio: 'Audio',
+    gridView: 'Vista de cuadrícula',
+    listView: 'Vista de lista',
+    centeredRowsView: 'Vista de filas centradas',
+    searchByName: 'Buscar por nombre de archivo…',
+    filterByExtension: 'Todas las extensiones',
+    dateFrom: 'Desde',
+    dateTo: 'Hasta',
+    clearDateFilters: 'Limpiar fechas',
+    loadingFiles: 'Buscando archivos',
+    loadingFilesDescription: 'Estamos preparando el contenido de tus carpetas.',
+    noMediaFiles: 'No hay archivos multimedia',
+    noFilterResults: 'No hay archivos que coincidan con estos filtros',
+    noMediaFilesDescription: 'No encontramos imágenes, vídeos o audio en las carpetas seleccionadas.',
+    noFilterResultsDescription: 'Prueba otra categoría, nombre o extensión.',
+    noDate: 'Fecha no disponible',
+    enlargeImage: 'Ampliar {file}',
+    closeEnlargedImage: 'Cerrar imagen ampliada',
+    imageEnlarged: 'Imagen ampliada: {file}',
+    playbackError: 'No se pudo reproducir. El formato o códec puede no ser compatible.',
+    authorCredit: 'Creado por',
+    scoutingProject: 'Descubre xScouting',
+    privacyNotice: 'Gallery no recopila ni transmite tus datos. Tus archivos y preferencias permanecen en este dispositivo.',
+    licenseNotice: 'Licenciado bajo GNU GPL v3 o posterior',
+    notFoundEyebrow: 'Página no encontrada',
+    notFoundTitle: 'Esta página no está disponible.',
+    notFoundDescription: 'Puede que la página se haya movido o que la dirección no sea correcta. Vuelve a tu biblioteca multimedia.',
+    notFoundHome: 'Ir a tu biblioteca',
+  },
+  ca: {
+    language: 'Idioma',
+    mediaFilesLabel: 'Fitxers multimèdia',
+    filterMediaType: 'Filtra els fitxers per tipus',
+    displayMode: 'Mode de visualització',
+    themeLight: 'Mode clar',
+    themeDark: 'Mode fosc',
+    changeTheme: 'Canvia al tema {theme}',
+    backToFolders: 'Torna a les carpetes',
+    homeEyebrow: 'El teu espai multimèdia',
+    homeTitle: 'Tot el teu contingut, en un sol lloc.',
+    homeDescription: 'Organitza les teves fotos, vídeos i àudio. Afegeix una carpeta per començar a explorar la biblioteca.',
+    allMedia: 'Explora tota la biblioteca',
+    foldersInLibrary: '{count} carpetes a la biblioteca',
+    foldersHeading: 'Les teves carpetes',
+    foldersDescription: 'Carpetes locals desades en aquest dispositiu',
+    addFolder: 'Afegeix una carpeta',
+    libraryStarts: 'La teva biblioteca comença aquí',
+    libraryStartsDescription: 'Afegeix una carpeta de l’ordinador per descobrir i organitzar els fitxers multimèdia.',
+    selectFolder: 'Selecciona una carpeta',
+    folderNotFound: 'La carpeta ja no està disponible en aquesta ubicació',
+    folderCheckFailed: 'No s’ha pogut comprovar aquesta carpeta',
+    folderNotFoundShort: 'Ubicació no disponible',
+    checkingFiles: 'Comprovant els fitxers…',
+    file: 'fitxer',
+    files: 'fitxers',
+    changeFolder: 'Canvia la carpeta',
+    openLocation: 'Obre la ubicació',
+    openLocationFailed: 'No s’ha pogut obrir aquesta ubicació.',
+    folderDesktop: 'Escriptori',
+    folderDownloads: 'Baixades',
+    folderDocuments: 'Documents',
+    folderPictures: 'Imatges',
+    folderMusic: 'Música',
+    folderVideos: 'Vídeos',
+    removeFolder: 'Elimina {folder}',
+    folderNotFoundAria: 'No s’ha trobat la carpeta',
+    folderCheckFailedAria: 'No s’ha pogut comprovar la carpeta',
+    pickerFailed: 'No s’ha pogut obrir el selector de carpetes.',
+    duplicateFolder: 'Aquesta carpeta ja és a la biblioteca.',
+    galleryEyebrow: 'Biblioteca multimèdia',
+    galleryTitle: 'La teva biblioteca multimèdia',
+    galleryDescription: 'Explora els fitxers i filtra per tipus, nom o extensió.',
+    searchingContent: 'Cercant a la biblioteca…',
+    itemsInLibrary: '{count} elements a la biblioteca',
+    filesHeading: 'Fitxers',
+    allTypes: 'Tot',
+    images: 'Imatges',
+    videos: 'Vídeos',
+    audio: 'Àudio',
+    gridView: 'Vista de quadrícula',
+    listView: 'Vista de llista',
+    centeredRowsView: 'Vista de files centrades',
+    searchByName: 'Cerca per nom de fitxer…',
+    filterByExtension: 'Totes les extensions',
+    dateFrom: 'Des de',
+    dateTo: 'Fins a',
+    clearDateFilters: 'Neteja les dates',
+    loadingFiles: 'Cercant fitxers',
+    loadingFilesDescription: 'S’està preparant el contingut de les carpetes.',
+    noMediaFiles: 'No s’han trobat fitxers multimèdia',
+    noFilterResults: 'Cap fitxer coincideix amb aquests filtres',
+    noMediaFilesDescription: 'No s’han trobat imatges, vídeos o àudio a les carpetes seleccionades.',
+    noFilterResultsDescription: 'Prova una altra categoria, nom o extensió.',
+    noDate: 'Data no disponible',
+    enlargeImage: 'Amplia {file}',
+    closeEnlargedImage: 'Tanca la imatge ampliada',
+    imageEnlarged: 'Imatge ampliada: {file}',
+    playbackError: 'No s’ha pogut reproduir. El format o còdec pot no ser compatible.',
+    authorCredit: 'Creat per',
+    scoutingProject: 'Descobreix xScouting',
+    privacyNotice: 'Gallery no recull ni transmet les teves dades. Els fitxers i les preferències es queden en aquest dispositiu.',
+    licenseNotice: 'Llicenciat sota la GNU GPL v3 o posterior',
+    notFoundEyebrow: 'Pàgina no trobada',
+    notFoundTitle: 'Aquesta pàgina no és al mapa.',
+    notFoundDescription: 'Pot ser que la pàgina s’hagi mogut o que l’adreça no sigui correcta. Torna a la biblioteca multimèdia.',
+    notFoundHome: 'Ves a la biblioteca',
+  },
+} as const
+
+type MessageKey = keyof typeof messages.en
+type LanguageContextValue = {
+  language: Language
+  locale: string
+  setLanguage: (language: Language) => void
+  t: (key: MessageKey, values?: Record<string, string | number>) => string
+}
+
+const LANGUAGE_STORAGE_KEY = 'gallery_language'
+const localeByLanguage: Record<Language, string> = { en: 'en-GB', es: 'es-ES', ca: 'ca-ES' }
+const LanguageContext = createContext<LanguageContextValue | null>(null)
+
+export function LanguageProvider({ children }: { children: ReactNode }) {
+  const [language, setLanguageState] = useState<Language>('en')
+
+  useEffect(() => {
+    try {
+      const savedLanguage = window.localStorage.getItem(LANGUAGE_STORAGE_KEY)
+      if (savedLanguage === 'en' || savedLanguage === 'es' || savedLanguage === 'ca') {
+        setLanguageState(savedLanguage)
+      }
+    } catch (error) {
+      console.error('Could not load the saved language:', error)
+    }
+  }, [])
+
+  useEffect(() => {
+    document.documentElement.lang = language
+  }, [language])
+
+  const setLanguage = useCallback((nextLanguage: Language) => {
+    setLanguageState(nextLanguage)
+    try {
+      window.localStorage.setItem(LANGUAGE_STORAGE_KEY, nextLanguage)
+    } catch (error) {
+      console.error('Could not save the language preference:', error)
+    }
+  }, [])
+
+  const t = useCallback(
+    (key: MessageKey, values: Record<string, string | number> = {}) => {
+      let message: string = messages[language][key]
+      for (const [name, value] of Object.entries(values)) {
+        message = message.replaceAll(`{${name}}`, String(value))
+      }
+      return message
+    },
+    [language],
+  )
+
+  return (
+    <LanguageContext.Provider value={{ language, locale: localeByLanguage[language], setLanguage, t }}>
+      {children}
+    </LanguageContext.Provider>
+  )
+}
+
+export function useI18n() {
+  const context = useContext(LanguageContext)
+  if (!context) throw new Error('useI18n must be used within LanguageProvider')
+  return context
+}

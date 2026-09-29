@@ -1,0 +1,23 @@
+appId: com.gallery.app
+productName: Gallery
+directories:
+  output: dist
+  buildResources: resources
+
+files:
+  - from: .
+    filter:
+      - package.json
+      - LICENSE
+      - app/**/*
+
+win:
+  target:
+    - nsis
+    - portable
+  icon: build/icons/icon.ico
+
+nsis:
+  oneClick: true
+  allowToChangeInstallationDirectory: false
+  createDesktopShortcut: true
