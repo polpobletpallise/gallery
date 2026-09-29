@@ -2,12 +2,35 @@ import path from 'path'
 import fs from 'fs'
 import { pathToFileURL } from 'url'
 import exifr from 'exifr'
-import { app, ipcMain, dialog, protocol, net, shell } from 'electron'
+import { app, BrowserWindow, ipcMain, dialog, protocol, net, shell } from 'electron'
+import electronUpdater from 'electron-updater'
 import serve from 'electron-serve'
 import { getMediaType, type MediaType } from '../shared/media-formats.js'
 import { createWindow } from './helpers/create-window'
 
 const isProd = process.env.NODE_ENV === 'production'
+const { autoUpdater } = electronUpdater
+
+autoUpdater.autoDownload = true
+
+autoUpdater.on('update-available', () => {
+  console.log('Hay una actualización disponible. Se descargará en segundo plano.')
+})
+
+autoUpdater.on('download-progress', (progress) => {
+  const mainWindow = BrowserWindow.getAllWindows()[0]
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.webContents.send('update-download-progress', progress.percent)
+  }
+})
+
+autoUpdater.on('error', (error) => {
+  console.error('Error al actualizar Gallery:', error)
+})
+
+autoUpdater.on('update-downloaded', () => {
+  autoUpdater.quitAndInstall()
+})
 
 protocol.registerSchemesAsPrivileged([
   {
@@ -51,17 +74,25 @@ app.whenReady().then(() => {
 
   const mainWindow = createWindow('main', {
     width: 1000,
-    height: 700,
+    height: 600,
+    autoHideMenuBar: true,
     webPreferences: {
       preload: path.join(import.meta.dirname, 'preload.js'),
     },
   })
+  mainWindow.maximize()
 
   if (isProd) {
     await mainWindow.loadURL('app://./home')
   } else {
     const port = process.argv[2]
     await mainWindow.loadURL(`http://localhost:${port}/home`)
+  }
+
+  if (app.isPackaged) {
+    autoUpdater.checkForUpdatesAndNotify().catch((error: unknown) => {
+      console.error('No se pudieron comprobar las actualizaciones:', error)
+    })
   }
 })().catch((error: unknown) => {
   console.error('Error al iniciar la ventana principal:', error)

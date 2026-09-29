@@ -12,12 +12,21 @@ files:
       - app/**/*
 
 win:
+  artifactName: ${productName}.${ext}
   target:
     - nsis
     - portable
   icon: build/icons/icon.ico
 
+publish:
+  provider: github
+  owner: polpobletpallise
+  repo: gallery
+
 nsis:
+  artifactName: ${productName} Setup.${ext}
   oneClick: true
   allowToChangeInstallationDirectory: false
   createDesktopShortcut: true
+  shortcutName: Gallery
+  differentialPackage: true

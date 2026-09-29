@@ -28,6 +28,7 @@ declare global {
           yearRange: string | null
         }>
       >
+      onUpdateDownloadProgress: (listener: (percent: number) => void) => () => void
     }
   }
 }

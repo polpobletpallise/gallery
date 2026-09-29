@@ -93,6 +93,43 @@ a:focus-visible {
   padding: 27px 0 72px;
 }
 
+.update-progress {
+  position: fixed;
+  z-index: 1001;
+  top: 16px;
+  right: 16px;
+  width: min(320px, calc(100vw - 32px));
+  padding: 13px 15px;
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  background: var(--surface-raised);
+  box-shadow: var(--shadow);
+}
+
+.update-progress-copy {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 9px;
+  color: var(--foreground);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.update-progress-track {
+  height: 5px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--border-strong);
+}
+
+.update-progress-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent-strong);
+  transition: width 180ms ease;
+}
+
 .app-header {
   margin-bottom: 34px;
 }
