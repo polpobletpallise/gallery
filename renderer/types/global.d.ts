@@ -28,6 +28,7 @@ declare global {
           yearRange: string | null
         }>
       >
+      changeZoom: (direction: 'in' | 'out') => Promise<number>
       onUpdateDownloadProgress: (listener: (percent: number) => void) => () => void
     }
   }

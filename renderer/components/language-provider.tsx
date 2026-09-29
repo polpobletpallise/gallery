@@ -5,6 +5,8 @@ export type Language = 'en' | 'es' | 'ca'
 const messages = {
   en: {
     language: 'Language',
+    zoomIn: 'Zoom in',
+    zoomOut: 'Zoom out',
     updateDownloading: 'Downloading update…',
     mediaFilesLabel: 'Media files',
     filterMediaType: 'Filter files by media type',
@@ -84,6 +86,8 @@ const messages = {
   },
   es: {
     language: 'Idioma',
+    zoomIn: 'Aumentar el zoom',
+    zoomOut: 'Reducir el zoom',
     updateDownloading: 'Descargando actualización…',
     mediaFilesLabel: 'Archivos multimedia',
     filterMediaType: 'Filtrar archivos por tipo',
@@ -163,6 +167,8 @@ const messages = {
   },
   ca: {
     language: 'Idioma',
+    zoomIn: 'Augmenta el zoom',
+    zoomOut: 'Redueix el zoom',
     updateDownloading: 'S’està baixant l’actualització…',
     mediaFilesLabel: 'Fitxers multimèdia',
     filterMediaType: 'Filtra els fitxers per tipus',

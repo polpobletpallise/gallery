@@ -75,10 +75,15 @@ app.whenReady().then(() => {
   const mainWindow = createWindow('main', {
     width: 1000,
     height: 600,
+    title: 'Gallery',
     autoHideMenuBar: true,
     webPreferences: {
       preload: path.join(import.meta.dirname, 'preload.js'),
     },
+  })
+  mainWindow.on('page-title-updated', (event) => {
+    event.preventDefault()
+    mainWindow.setTitle('Gallery')
   })
   mainWindow.maximize()
 
@@ -109,6 +114,18 @@ app.on('window-all-closed', () => {
 
 // Al final de main/main.ts
 console.log('>>> CARGANDO HANDLERS IPC DE ELECTRON <<<')
+
+ipcMain.handle('change-zoom', (event, direction: unknown) => {
+  if (direction !== 'in' && direction !== 'out') {
+    throw new TypeError('Invalid zoom direction.')
+  }
+
+  const currentZoom = event.sender.getZoomFactor()
+  const zoomChange = direction === 'in' ? 0.1 : -0.1
+  const nextZoom = Math.min(2.5, Math.max(0.5, Math.round((currentZoom + zoomChange) * 10) / 10))
+  event.sender.setZoomFactor(nextZoom)
+  return nextZoom
+})
 
 ipcMain.handle('select-folder', async () => {
   const result = await dialog.showOpenDialog({

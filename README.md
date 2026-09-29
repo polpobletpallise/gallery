@@ -2,9 +2,9 @@
 
 A privacy-first desktop gallery for your personal media library.
 
-[Download Portable](https://github.com/polpobletpallise/gallery/releases/latest/download/Gallery.1.0.0.exe) — no installation required; recommended for USB drives or running directly from a folder. Updates must be downloaded and applied manually. App preferences remain stored on each computer.
+[Download Portable](https://github.com/polpobletpallise/gallery/releases/latest) — choose `Gallery-<version>.exe`. No installation required; recommended for USB drives or running directly from a folder. Updates must be downloaded and applied manually. App preferences remain stored on each computer.
 
-[Download Setup for PC](https://github.com/polpobletpallise/gallery/releases/latest/download/Gallery.Setup.1.0.0.exe) — install Gallery on your Windows PC and add it to your desktop. Updates are checked and downloaded automatically; Gallery restarts to install them.
+[Download Setup for PC](https://github.com/polpobletpallise/gallery/releases/latest) — choose `Gallery-<version>_Setup.exe` to install Gallery on your Windows PC and add it to your desktop. Updates are checked and downloaded automatically; Gallery restarts to install them.
 
 Gallery brings photos, videos, and audio together in one elegant local experience, designed for people who want fast access to their files without relying on cloud services or complicated workflows.
 

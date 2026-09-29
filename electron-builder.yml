@@ -12,7 +12,7 @@ files:
       - app/**/*
 
 win:
-  artifactName: ${productName}.${ext}
+  artifactName: ${productName}-${version}.${ext}
   target:
     - nsis
     - portable
@@ -24,7 +24,7 @@ publish:
   repo: gallery
 
 nsis:
-  artifactName: ${productName} Setup.${ext}
+  artifactName: ${productName}-${version}_Setup.${ext}
   oneClick: true
   allowToChangeInstallationDirectory: false
   createDesktopShortcut: true

@@ -6,6 +6,13 @@ contextBridge.exposeInMainWorld('electronAPI', {
   openLocation: (targetPath: string) => ipcRenderer.invoke('open-location', targetPath),
   getMediaFiles: (folders: string[]) => ipcRenderer.invoke('get-media-files', folders),
   getFolderSummaries: (folders: string[]) => ipcRenderer.invoke('get-folder-summaries', folders),
+  changeZoom: async (direction: 'in' | 'out') => {
+    const zoomFactor: unknown = await ipcRenderer.invoke('change-zoom', direction)
+    if (typeof zoomFactor !== 'number') {
+      throw new TypeError('The app returned an invalid zoom level.')
+    }
+    return zoomFactor
+  },
   onUpdateDownloadProgress: (listener: (percent: number) => void) => {
     const handler = (_event: Electron.IpcRendererEvent, percent: number) => listener(percent)
     ipcRenderer.on('update-download-progress', handler)

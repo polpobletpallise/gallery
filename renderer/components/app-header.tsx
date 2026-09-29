@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { ArrowLeft, FolderOpen } from 'lucide-react'
+import { ArrowLeft, FolderOpen, ZoomIn, ZoomOut } from 'lucide-react'
 import { ThemeToggle } from './theme-provider'
 import { useI18n } from './language-provider'
 
@@ -12,6 +12,16 @@ interface AppHeaderProps {
 
 export function AppHeader({ eyebrow, title, description, backHref }: AppHeaderProps) {
   const { language, setLanguage, t } = useI18n()
+
+  const changeZoom = async (direction: 'in' | 'out') => {
+    if (!window.electronAPI) return
+
+    try {
+      await window.electronAPI.changeZoom(direction)
+    } catch (error) {
+      console.error('Could not change the app zoom level:', error)
+    }
+  }
 
   return (
     <header className="app-header">
@@ -35,6 +45,24 @@ export function AppHeader({ eyebrow, title, description, backHref }: AppHeaderPr
               <option value="es">Español</option>
             </select>
           </label>
+          <button
+            className="zoom-control"
+            type="button"
+            aria-label={t('zoomOut')}
+            title={t('zoomOut')}
+            onClick={() => void changeZoom('out')}
+          >
+            <ZoomOut size={17} />
+          </button>
+          <button
+            className="zoom-control"
+            type="button"
+            aria-label={t('zoomIn')}
+            title={t('zoomIn')}
+            onClick={() => void changeZoom('in')}
+          >
+            <ZoomIn size={17} />
+          </button>
           <ThemeToggle />
         </div>
       </div>

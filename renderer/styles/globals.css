@@ -168,6 +168,27 @@ a:focus-visible {
   border-color: color-mix(in srgb, var(--accent) 48%, var(--border-strong));
 }
 
+.zoom-control {
+  display: inline-grid;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  place-items: center;
+  border: 1px solid var(--border-strong);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--muted);
+  cursor: pointer;
+  transition: border-color 160ms ease, background 160ms ease, color 160ms ease;
+}
+
+.zoom-control:hover,
+.zoom-control:focus-visible {
+  border-color: color-mix(in srgb, var(--accent) 48%, var(--border-strong));
+  background: var(--surface-hover);
+  color: var(--foreground);
+}
+
 .sr-only {
   position: absolute;
   width: 1px;
