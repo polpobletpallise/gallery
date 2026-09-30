@@ -1,18 +1,18 @@
-# Gallery
+# Mnemotheca
 
 A privacy-first desktop gallery for your personal media library.
 
-[Download Portable](https://github.com/polpobletpallise/gallery/releases/latest) — choose `Gallery-<version>.exe`. No installation required; recommended for USB drives or running directly from a folder. Updates must be downloaded and applied manually. App preferences remain stored on each computer.
+[Download Portable](https://github.com/polpobletpallise/mnemotheca/releases/latest) — choose `Mnemotheca-<version>.exe`. No installation required; recommended for USB drives or running directly from a folder. Updates must be downloaded and applied manually. App preferences remain stored on each computer.
 
-[Download Setup for PC](https://github.com/polpobletpallise/gallery/releases/latest) — choose `Gallery-<version>_Setup.exe` to install Gallery on your Windows PC and add it to your desktop. Updates are checked and downloaded automatically; Gallery restarts to install them.
+[Download Setup for PC](https://github.com/polpobletpallise/mnemotheca/releases/latest) — choose `Mnemotheca-<version>_Setup.exe` to install Mnemotheca on your Windows PC and add it to your desktop. Updates are checked and downloaded automatically; Mnemotheca restarts to install them.
 
-Gallery brings photos, videos, and audio together in one elegant local experience, designed for people who want fast access to their files without relying on cloud services or complicated workflows.
+Mnemotheca brings photos, videos, and audio together in one elegant local experience, designed for people who want fast access to their files without relying on cloud services or complicated workflows.
 
 ## Overview
 
 Organize your media around the folders you already use every day. Add your libraries, explore your content in context, and revisit the moments that matter most from a clean, focused interface built for everyday browsing.
 
-## Why Gallery
+## Why Mnemotheca
 
 - Local-first experience: your media stays on your device
 - Simple folder-based organization: add the libraries you care about
@@ -32,12 +32,12 @@ Connect the folders that matter to you and build a curated library around your e
 Explore media in a clean, intentional flow that helps you review content quickly and revisit collections with ease.
 
 ### Privacy and control
-Gallery processes media locally and keeps your selections and preferences on your device. Your library remains under your control.
+Mnemotheca processes media locally and keeps your selections and preferences on your device. Your library remains under your control.
 
 ## How it works
 
 1. Add the folders you want to include in your library.
-2. Gallery scans the selected media locally on your machine.
+2. Mnemotheca scans the selected media locally on your machine.
 3. Browse, review, and revisit your content from a dedicated desktop experience.
 
 ## Built for
@@ -59,7 +59,7 @@ We value thoughtful improvements that stay aligned with the app’s goals: priva
 
 ## Privacy
 
-Gallery is designed to respect your data. Files are processed locally, and selected folders and preferences are stored on the device where the app is running. Nothing is uploaded or transmitted for the sake of indexing your library.
+Mnemotheca is designed to respect your data. Files are processed locally, and selected folders and preferences are stored on the device where the app is running. Nothing is uploaded or transmitted for the sake of indexing your library.
 
 ## License
 

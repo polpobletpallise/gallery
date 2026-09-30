@@ -1,5 +1,5 @@
-appId: com.gallery.app
-productName: Gallery
+appId: com.mnemotheca.app
+productName: Mnemotheca
 directories:
   output: dist
   buildResources: resources
@@ -21,12 +21,12 @@ win:
 publish:
   provider: github
   owner: polpobletpallise
-  repo: gallery
+  repo: mnemotheca
 
 nsis:
   artifactName: ${productName}-${version}_Setup.${ext}
   oneClick: true
   allowToChangeInstallationDirectory: false
   createDesktopShortcut: true
-  shortcutName: Gallery
+  shortcutName: Mnemotheca
   differentialPackage: true

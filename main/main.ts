@@ -45,7 +45,7 @@ autoUpdater.on('update-downloaded', (info) => {
 })
 
 autoUpdater.on('error', (error) => {
-  log.error('Error al actualizar Gallery:', error)
+  log.error('Error al actualizar Mnemotheca:', error)
 })
 
 protocol.registerSchemesAsPrivileged([
@@ -98,7 +98,7 @@ app.whenReady().then(() => {
     const mainWindow = createWindow('main', {
       width: 1000,
       height: 600,
-      title: 'Gallery',
+      title: 'Mnemotheca',
       autoHideMenuBar: true,
       webPreferences: {
         preload: path.join(import.meta.dirname, 'preload.js'),
@@ -106,7 +106,7 @@ app.whenReady().then(() => {
     })
     mainWindow.on('page-title-updated', (event) => {
       event.preventDefault()
-      mainWindow.setTitle('Gallery')
+      mainWindow.setTitle('Mnemotheca')
     })
     mainWindow.maximize()
 

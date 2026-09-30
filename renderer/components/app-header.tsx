@@ -26,11 +26,11 @@ export function AppHeader({ eyebrow, title, description, backHref }: AppHeaderPr
   return (
     <header className="app-header">
       <div className="topbar">
-        <Link className="brand" href="/home" aria-label="Gallery">
+        <Link className="brand" href="/home" aria-label="Mnemotheca">
           <span className="brand-mark">
             <FolderOpen size={20} strokeWidth={2.1} />
           </span>
-          <span className="brand-name">gallery<span>.</span></span>
+          <span className="brand-name">Mnemotheca<span>.</span></span>
         </Link>
         <div className="topbar-controls">
           <label className="language-control">
